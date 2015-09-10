@@ -16,6 +16,7 @@ OUTPUT_FILENAME="cppcheck.$OUTPUT_FORMAT"
 gen_headers() {
     rm -f "$INCLUDES_FILE"
     find $SCAN_DIRECTORIES -name '*.h' -printf "%h\n" > "$INCLUDES_FILE"
+    sort -u "$INCLUDES_FILE" -o "$INCLUDES_FILE"
 }
 
 check_project() {
