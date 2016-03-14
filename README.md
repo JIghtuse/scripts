@@ -27,3 +27,15 @@ Usage:
 
     echo 'if grep MODIFY <<< $1; then cp "$FIRMWARE" "$TFTPBOOT"; fi' > copy_firmware.sh
     ./notifyloop.sh $FIRMWARE sh ./copy_firmware.sh
+
+## filenames.py
+
+Extracts unique filenames from grep-like output.
+
+Usage:
+
+    echo -e "dog\ncat\nfish\nhorse\nbird" > /tmp/file_01.txt
+    echo -e "orange\napple\ngrape" > /tmp/file_02.txt
+    echo -e "foo\nbar" > /tmp/file_03.txt
+    # It can give wrong results if context lines has ':'
+    grep -C2  or /tmp/file*.txt | ./filenames.py | xargs rm
