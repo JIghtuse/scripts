@@ -39,3 +39,8 @@ Usage:
     echo -e "foo\nbar" > /tmp/file_03.txt
     # It can give wrong results if context lines has ':'
     grep -C2  or /tmp/file*.txt | ./filenames.py | xargs rm
+
+## [`iptables_accept_all.sh`](iptables_accept_all.sh)
+
+1. Saves backup.
+2. Flushes all iptables rules, deletes all chains, accepts all traffic.
