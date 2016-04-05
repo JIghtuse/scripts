@@ -1,6 +1,6 @@
 # Some scripts
 
-## anonymize.sh
+## [`anonymize.sh`](anonymize.sh)
 
 Replace all occurences of username in input files with some stub. It will try to
 guess username if you will not pass one. Usage:
@@ -12,7 +12,7 @@ Or:
     STUB=dog USER=nobody ./anonymize.sh file1 file2 file3
 
 
-## notifyloop.sh
+## [`notifyloop.sh`](notifyloop.sh)
 
 Watches for changes in directory and calls user command/script on each change.
 Idea based on ggreer's [fsevents-tools](https://github.com/ggreer/fsevents-tools).
@@ -28,7 +28,7 @@ Usage:
     echo 'if grep MODIFY <<< $1; then cp "$FIRMWARE" "$TFTPBOOT"; fi' > copy_firmware.sh
     ./notifyloop.sh $FIRMWARE sh ./copy_firmware.sh
 
-## filenames.py
+## [`filenames.py`](filenames.py)
 
 Extracts unique filenames from grep-like output.
 
