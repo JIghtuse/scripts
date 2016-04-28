@@ -44,3 +44,13 @@ Usage:
 
 1. Saves backup.
 2. Flushes all iptables rules, deletes all chains, accepts all traffic.
+
+## [`ngs_forecast.py`](ngs_forecast.py)
+
+Gets weather forecast for specified city from weather.ngs.ru and prints it.
+Keeps cache in user cache directory, invalidates it after 10 minutes.
+
+Usage:
+
+    ngs_forecast.py Новосибирск
+    ngs_forecast.py Moscow
