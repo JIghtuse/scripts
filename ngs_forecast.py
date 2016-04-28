@@ -92,7 +92,8 @@ def print_forecast(city):
 
     result = data["result"]
     upd_time = time.localtime(int(result["cache_update_time"]))
-    date = "{} {}:{}".format(result["date"], upd_time.tm_hour, upd_time.tm_min)
+    date = "{} {:02d}:{:02d}".format(result["date"],
+                                     upd_time.tm_hour, upd_time.tm_min)
     temperature = float(result["temp_current_c"].replace(",", "."))
 
     print("Прогноз получен: {}".format(date))
