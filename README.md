@@ -54,3 +54,13 @@ Usage:
 
     ngs_forecast.py Новосибирск
     ngs_forecast.py Moscow
+
+## [`yandex_predictor.py`](yandex_predictor.py)
+
+Shows completion suggestion for specified query from
+[yandex predictor](https://tech.yandex.ru/predictor/)
+
+Usage:
+
+    export PREDICTOR_API_KEY="<your predictor API key>"
+    yandex_predictor.py how to
