@@ -34,6 +34,10 @@ COPYRIGHT_POSITION = Position.BOTTOM_RIGHT
 # Часть изображения, которую должен занимать копирайт
 PROPORTION = 0.07
 
+# Имя файла с тёмным и светлым копирайтом
+WATERMARK_DARK_FILENAME = "data/wmark_dark.png"
+WATERMARK_LIGHT_FILENAME = "data/wmark_light.png"
+
 
 def reduce_opacity(im, opacity):
     """Делает изображение более прозрачным"""
@@ -89,11 +93,11 @@ def add_watermark_to_file(image_filename, output_filename,
         sys.exit("Светлый и тёмный копирайт должны быть одного размера")
 
     image = Image.open(image_filename)
-    scaled_size = [i * PROPORTION for i in image.size]
+    scale = max(image.size) * PROPORTION
     scaled_light = wmark_light.copy()
-    scaled_light.thumbnail(scaled_size)
+    scaled_light.thumbnail((scale, scale))
     scaled_dark = wmark_dark.copy()
-    scaled_dark.thumbnail(scaled_size)
+    scaled_dark.thumbnail((scale, scale))
 
     x = 0
     y = 0
@@ -131,8 +135,8 @@ def add_watermark_to_directory_images(directory):
     if not os.path.isdir(output_directory):
         os.mkdir(output_directory)
 
-    wmark_light = open_watermark("data/wmark_light.png", WATERMARK_OPACITY)
-    wmark_dark = open_watermark("data/wmark_dark.png", WATERMARK_OPACITY)
+    wmark_light = open_watermark(WATERMARK_LIGHT_FILENAME, WATERMARK_OPACITY)
+    wmark_dark = open_watermark(WATERMARK_DARK_FILENAME, WATERMARK_OPACITY)
 
     for subdir, dirs, files in os.walk(directory):
         for filename in tqdm(files):
