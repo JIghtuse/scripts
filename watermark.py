@@ -31,6 +31,9 @@ class Position(Enum):
 
 COPYRIGHT_POSITION = Position.BOTTOM_RIGHT
 
+# Часть изображения, которую должен занимать копирайт
+PROPORTION = 0.07
+
 
 def reduce_opacity(im, opacity):
     """Делает изображение более прозрачным"""
@@ -54,8 +57,7 @@ def open_watermark(filename, opacity):
 
 
 def add_watermark(image, watermark, position):
-    """Adds a watermark to an image."""
-
+    """Добавляет watermark к объекту изображения"""
     if image.mode != 'RGBA':
         image = image.convert('RGBA')
     layer = Image.new('RGBA', image.size, (0, 0, 0, 0))
@@ -64,72 +66,94 @@ def add_watermark(image, watermark, position):
     return Image.composite(layer, image, layer)
 
 
-def add_watermark_to_file(image_filename, output_filename,
-                          wmark_light, wmark_dark,
-                          position):
-    if wmark_light.size != wmark_dark.size:
-        sys.exit("Светлый и тёмный копирайт должны быть одного размера")
-
-    image = Image.open(image_filename)
-    x = 0
-    y = 0
-
-    if position == Position.TOP_RIGHT or position == Position.BOTTOM_RIGHT:
-        x += image.size[0] - wmark_dark.size[0]
-    if position == Position.BOTTOM_RIGHT or position == Position.BOTTOM_LEFT:
-        y += image.size[1] - wmark_light.size[1]
-
+def calculate_stats(image, x, y, watermark_size):
+    """Считает количество светлых и тёмных пикселей в пределах watermark"""
     ndark = 0
     nlight = 0
-    for i in range(x, x + wmark_light.size[0]):
-        for j in range(y, y + wmark_light.size[1]):
+    for i in range(x, x + watermark_size[0]):
+        for j in range(y, y + watermark_size[1]):
             pixel = image.getpixel((i, j))
             average = sum(pixel[:3]) / 3
             if average > 127:
                 nlight += 1
             else:
                 ndark += 1
+    return (ndark, nlight)
+
+
+def add_watermark_to_file(image_filename, output_filename,
+                          wmark_light, wmark_dark,
+                          position):
+    """Добавляет watermark к изображению"""
+    if wmark_light.size != wmark_dark.size:
+        sys.exit("Светлый и тёмный копирайт должны быть одного размера")
+
+    image = Image.open(image_filename)
+    scaled_size = [i * PROPORTION for i in image.size]
+    scaled_light = wmark_light.copy()
+    scaled_light.thumbnail(scaled_size)
+    scaled_dark = wmark_dark.copy()
+    scaled_dark.thumbnail(scaled_size)
+
+    x = 0
+    y = 0
+
+    if position == Position.TOP_RIGHT or position == Position.BOTTOM_RIGHT:
+        x += image.size[0] - scaled_dark.size[0]
+    if position == Position.BOTTOM_RIGHT or position == Position.BOTTOM_LEFT:
+        y += image.size[1] - scaled_light.size[1]
+
+    ndark, nlight = calculate_stats(image, x, y, scaled_light.size)
 
     if ndark > nlight:
-        wmark = wmark_light
+        wmark = scaled_light
     else:
-        wmark = wmark_dark
+        wmark = scaled_dark
 
     watermarked = add_watermark(image, wmark, (x, y))
     watermarked.save(output_filename)
 
 
-def gen_new_name(name, output_directory=None):
-    if output_directory is None:
-        dirname = os.path.dirname(name)
-        return os.path.join(dirname, "watermarked_" + os.path.basename(name))
-    else:
-        return os.path.join(output_directory, os.path.basename(name))
+def gen_new_directory_name(name, output_directory=None):
+    """Создаёт новое имя директории на основе существующего"""
+    dirname = os.path.dirname(name)
+    return os.path.join(dirname, "watermarked_" + os.path.basename(name))
 
 
-if __name__ == "__main__":
-    root = Tk()
-    root.withdraw()
-    directory = filedialog.askdirectory(title="Выбери директорию")
-    output_directory = gen_new_name(directory)
+def gen_new_file_name(name, output_directory):
+    """Создаёт путь к новому изображению"""
+    return os.path.join(output_directory, os.path.basename(name))
+
+
+def add_watermark_to_directory_images(directory):
+    """Добавляет watermark ко всем изображениям в директории"""
+    output_directory = gen_new_directory_name(directory)
     if not os.path.isdir(output_directory):
         os.mkdir(output_directory)
 
     wmark_light = open_watermark("data/wmark_light.png", WATERMARK_OPACITY)
     wmark_dark = open_watermark("data/wmark_dark.png", WATERMARK_OPACITY)
 
-    if os.path.isdir(directory):
-        for subdir, dirs, files in os.walk(directory):
-            for filename in tqdm(files):
-                input_file = os.path.join(subdir, filename)
-                try:
-                    add_watermark_to_file(input_file,
-                                          gen_new_name(input_file, output_directory),
-                                          wmark_light,
-                                          wmark_dark,
-                                          COPYRIGHT_POSITION)
-                except OSError as e:
-                    print("Не удалось обработать файл {}: {}".format(
-                          input_file, e))
-    else:
-        sys.exit("Нужно выбрать директорию")
+    for subdir, dirs, files in os.walk(directory):
+        for filename in tqdm(files):
+            input_file = os.path.join(subdir, filename)
+            try:
+                add_watermark_to_file(input_file,
+                                      gen_new_file_name(input_file,
+                                                        output_directory),
+                                      wmark_light,
+                                      wmark_dark,
+                                      COPYRIGHT_POSITION)
+            except OSError as e:
+                print("Не удалось обработать файл {}: {}".format(
+                      input_file, e))
+
+
+if __name__ == "__main__":
+    root = Tk()
+    root.withdraw()
+    directory = filedialog.askdirectory(title="Выбери директорию")
+    if directory:
+        add_watermark_to_directory_images(directory)
+        print("Нажми Enter")
+        _ = input()
