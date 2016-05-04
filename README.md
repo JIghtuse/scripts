@@ -64,3 +64,13 @@ Usage:
 
     export PREDICTOR_API_KEY="<your predictor API key>"
     yandex_predictor.py how to
+
+## [`toggle_swap.sh`](toggle_swap.sh)
+
+Adds/removes swap file to increase/decrease available memory. Useful on limited
+memory devices/environments.
+
+Usage:
+
+    toggle_swap.sh enable 512 # in megabytes
+    toggle_swap.sh disable
