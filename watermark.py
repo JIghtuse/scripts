@@ -2,6 +2,7 @@
 
 from PIL import Image
 from PIL import ImageEnhance
+from PIL import ExifTags
 from enum import Enum, unique
 from tqdm import tqdm
 from tkinter import filedialog
@@ -85,6 +86,29 @@ def calculate_stats(image, x, y, watermark_size):
     return (ndark, nlight)
 
 
+# Rotate image based on exif data
+# http://stackoverflow.com/a/22840805
+def rotate_image(image, orientation):
+    if orientation is 6:
+        image = image.rotate(-90, expand=True)
+    elif orientation is 8:
+        image = image.rotate(90, expand=True)
+    elif orientation is 3:
+        image = image.rotate(180, expand=True)
+    elif orientation is 2:
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    elif orientation is 5:
+        image = image.rotate(-90, expand=True)
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    elif orientation is 7:
+        image = image.rotate(90, expand=True)
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    elif orientation is 4:
+        image = image.rotate(180, expand=True)
+        image = image.transpose(Image.FLIP_LEFT_RIGHT)
+    return image
+
+
 def add_watermark_to_file(image_filename, output_filename,
                           wmark_light, wmark_dark,
                           position):
@@ -93,6 +117,14 @@ def add_watermark_to_file(image_filename, output_filename,
         sys.exit("Светлый и тёмный копирайт должны быть одного размера")
 
     image = Image.open(image_filename)
+
+    exif_data = image._getexif()
+    if exif_data is not None:
+        exif = {ExifTags.TAGS[k]: v for k, v in exif_data.items()
+                if k in ExifTags.TAGS}
+        if 'Orientation' in exif:
+            image = rotate_image(image, exif['Orientation'])
+
     scale = max(image.size) * PROPORTION
     scaled_light = wmark_light.copy()
     scaled_light.thumbnail((scale, scale))
