@@ -12,6 +12,7 @@ import unidecode
 FORECAST_CACHE = os.path.join(appdirs.user_cache_dir(), "ngs_forecast.cache")
 WEATHER_URL = 'http://weather.ngs.ru/json'
 CACHE_INVALIDATION_TIME = 600  # s
+REPEAT_DOWNLOAD = 10
 
 
 def cached(fname):
@@ -34,6 +35,12 @@ def cached(fname):
             if (city not in cache) or cache_invalidated():
                 # Triying to get new forecast
                 result = function(city)
+                for _ in range(REPEAT_DOWNLOAD):
+                    if "error" in result:
+                        time.sleep(1 / 10)
+                        result = function(city)
+                    else:
+                        break
                 if "error" not in result:
                     # Ok, update cache
                     print("[данные получены]")
