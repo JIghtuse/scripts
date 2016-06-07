@@ -14,10 +14,10 @@ step=$(echo "2*$pi/$steps" | bc -l)
 rad=0
 
 while true; do
-    for i in $(seq $steps); do
+    for _ in $(seq $steps); do
         x=$(echo "scale=1; (c($rad)*$radius + $center_x)" | bc -l)
         y=$(echo "scale=1; (s($rad)*$radius + $center_y)" | bc -l)
-        xdotool mousemove $x $y
+        xdotool mousemove "$x" "$y"
 
         rad=$(echo "$rad + $step" | bc -l)
     done

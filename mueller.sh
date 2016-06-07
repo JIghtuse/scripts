@@ -10,10 +10,10 @@ len=$(echo "scale=0; $lines / ${#words[@]}" | bc -l)
 txt=""
 
 for word in "${words[@]}"; do
-	word=`echo $word | sed -e 's/[A-Z]*/\L&/g;s/[,.;:]//g'`;
-	if [ -z $word ]; then exit; fi;
+	word=$(echo "$word" | sed -e 's/[A-Z]*/\L&/g;s/[,.;:]//g');
+	if [ -z "$word" ]; then exit; fi;
 	txt="$txt$(zgrep -aA$len '^'$word'$' $dict | sed -e '/^$/d; 1s/^/ &/;/^[^ ]/,$d')"
 done
-if [ -z $txt ]; then exit; fi;
+if [ -z "$txt" ]; then exit; fi;
 #zenity --notification --text="$txt"
 notify-send "$txt"
