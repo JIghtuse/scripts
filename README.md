@@ -62,3 +62,8 @@ Usage:
 
     toggle_swap.sh enable 512 # in megabytes
     toggle_swap.sh disable
+
+## [`save_test_data.py`](save_test_data.py)
+
+Splits data passed as a first argument to a script into input and output file.
+Recommended way of usage: as an action on clipboard data.
