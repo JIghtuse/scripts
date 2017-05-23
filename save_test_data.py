@@ -21,6 +21,8 @@ Sample Output
 
 
 import notify2
+import os
+import re
 import sys
 
 PROGRAM = "cios"
@@ -28,8 +30,11 @@ PROGRAM = "cios"
 INPUT_START = "Sample Input"
 OUTPUT_START = "Sample Output"
 
-INPUT_FILE_PATH = "/tmp/input01.txt"
-OUTPUT_FILE_PATH = "/tmp/output01.txt"
+OUTPUT_DIRECTORY = "/tmp/"
+INPUT_FILENAME_TEMPLATE = "input{:02}.txt"
+OUTPUT_FILENAME_TEMPLATE = "output{:02}.txt"
+INPUT_FILENAME_RE = "input(\d+).txt"
+OUTPUT_FILENAME_RE = "output(\d+).txt"
 
 MINIMAL_LINES = 6
 
@@ -79,13 +84,40 @@ def split_and_save(data, input_filename, output_filename):
     notify2.Notification(f"{PROGRAM} - Data saved", msg).show()
 
 
+def build_path(filename_template, index):
+    return os.path.join(OUTPUT_DIRECTORY, filename_template.format(index))
+
+
+def determine_next_index():
+    idx = 1
+    directory = os.fsencode(OUTPUT_DIRECTORY)
+    def increment_idx_on_match(idx, regex, filename):
+        match = re.findall(regex, filename)
+        if match:
+            file_idx = int(match[0])
+            if file_idx >= idx:
+                idx = file_idx + 1
+        return idx
+
+    for filename in os.listdir(directory):
+        filename = os.fsdecode(filename)
+        idx = increment_idx_on_match(idx, INPUT_FILENAME_RE, filename)
+        idx = increment_idx_on_match(idx, OUTPUT_FILENAME_RE, filename)
+    return idx
+
+
 def main():
     notify2.init(PROGRAM)
 
+    if len(sys.argv) < 2:
+        notify_and_terminate(f"Usage: {sys.argv[0]} 'testcase'")
     data = sys.argv[1].split('\n')
 
     try:
-        split_and_save(data, INPUT_FILE_PATH, OUTPUT_FILE_PATH)
+        index = determine_next_index()
+        input_filename = build_path(INPUT_FILENAME_TEMPLATE, index)
+        output_filename = build_path(OUTPUT_FILENAME_TEMPLATE, index)
+        split_and_save(data, input_filename, output_filename)
     except ValueError as e:
         error_msg = "Missing input or output start marker in data"
         notify_and_terminate(error_msg)
