@@ -13,10 +13,9 @@ LIMIT = 3
 API_KEY = os.environ["PREDICTOR_API_KEY"]
 
 PREDICTOR_URL = "https://predictor.yandex.net/api/v1/predict.json"
-PREDICTOR_LANGS_URL = "{}/getLangs?key={}".format(PREDICTOR_URL, API_KEY)
-COMPLETE_TEMPLATE = "{}/complete?key={}&lang={}&limit={}&q="
-PREDICTOR_COMPLETE_URL = COMPLETE_TEMPLATE.format(PREDICTOR_URL, API_KEY,
-                                                  LANGUAGE, LIMIT)
+PREDICTOR_LANGS_URL = f"{PREDICTOR_URL}/getLangs?key={API_KEY}"
+PREDICTOR_COMPLETE_URL = (f"{PREDICTOR_URL}/complete?key={API_KEY}"
+                          f"&lang={LANGUAGE}&limit={LIMIT}&q=")
 
 
 def make_request(url):
@@ -27,7 +26,7 @@ def make_request(url):
 def check_language():
     languages = make_request(PREDICTOR_LANGS_URL)
     if LANGUAGE not in languages:
-        sys.exit("Sorry, language {} is not supported".format(LANGUAGE))
+        sys.exit(f"Sorry, language {LANGUAGE} is not supported")
 
 
 def print_completions(text):
@@ -43,7 +42,7 @@ def print_completions(text):
 
 if __name__ == "__main__":
     if len(sys.argv) < 2:
-        sys.exit("usage: {} <query>".format(sys.argv[0]))
+        sys.exit(f"usage: {sys.argv[0]} <query>")
     check_language()
     query = ' '.join(sys.argv[1:])
     print_completions(query)
